@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trader-AI | Traders Factory</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{min-height:100vh;background:#0a0f0a;font-family:Georgia,serif;color:#d4d4d4}
+.bg{position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at 20% 20%,rgba(16,40,16,0.6) 0%,transparent 60%)}
+.wrap{max-width:860px;margin:0 auto;padding:32px 20px;position:relative}
+.header{text-align:center;margin-bottom:40px}
+.badge{display:inline-flex;align-items:center;gap:10px;background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.2);border-radius:4px;padding:6px 16px;margin-bottom:20px}
+.dot{width:8px;height:8px;border-radius:50%;background:#4ade80;box-shadow:0 0 8px #4ade80}
+.badge-text{font-size:0.7rem;letter-spacing:0.15em;color:#c9a84c;text-transform:uppercase;font-family:monospace}
+h1{font-size:2.2rem;font-weight:700;color:#f0e6c8;letter-spacing:-0.02em;margin-bottom:4px}
+h1 span{color:#c9a84c}
+.sub{font-size:0.72rem;letter-spacing:0.2em;color:#6b7c6b;text-transform:uppercase;font-family:monospace;margin-bottom:6px}
+.desc{color:#5a6b5a;font-size:0.85rem;font-style:italic}
+.card{background:rgba(10,18,10,0.8);border:1px solid rgba(201,168,76,0.15);border-radius:12px;padding:28px;margin-bottom:20px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+label{display:block;font-size:0.65rem;letter-spacing:0.18em;color:#c9a84c;margin-bottom:6px;font-family:monospace}
+input{width:100%;background:rgba(201,168,76,0.04);border:1px solid rgba(201,168,76,0.2);border-radius:6px;padding:10px 14px;color:#f0e6c8;font-size:0.9rem;outline:none;font-family:monospace}
+input::placeholder{color:#3a4a3a}
+.dropzone{border:2px dashed rgba(201,168,76,0.2);border-radius:10px;padding:36px;text-align:center;cursor:pointer;margin-bottom:16px;background:rgba(10,15,10,0.5);transition:border-color 0.2s}
+.dropzone:hover{border-color:rgba(201,168,76,0.5)}
+.dropzone.has-image{padding:12px}
+.dropzone p{color:#c9a84c;font-size:0.85rem;font-weight:600;margin-bottom:6px}
+.dropzone small{color:#4a5a4a;font-size:0.75rem}
+.dropzone img{max-height:260px;max-width:100%;border-radius:6px;display:block;margin:0 auto}
+.dropzone .change{margin-top:8px;font-size:0.72rem;color:#6b7c6b;font-family:monospace}
+.btn{width:100%;padding:14px 24px;background:linear-gradient(135deg,#c9a84c,#a07830);border:1px solid #c9a84c;border-radius:8px;color:#0a0f0a;font-size:0.85rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer;font-family:monospace}
+.btn:disabled{background:rgba(201,168,76,0.1);border-color:rgba(201,168,76,0.2);color:#6b7c4a;cursor:not-allowed}
+.error{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:6px;padding:12px 14px;margin-bottom:14px;color:#f87171;font-size:0.78rem;font-family:monospace;word-break:break-word}
+.result{background:rgba(10,18,10,0.9);border:1px solid rgba(201,168,76,0.2);border-radius:12px;padding:28px}
+.result-header{display:flex;align-items:center;gap:10px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid rgba(201,168,76,0.1)}
+.result-title{font-size:0.7rem;letter-spacing:0.18em;color:#c9a84c;font-family:monospace;text-transform:uppercase}
+.analysis p{line-height:1.7;margin:2px 0;font-size:0.875rem;color:#d4d4d4}
+.analysis p.header{font-weight:700;color:#c9a84c;font-size:0.95rem}
+.footer{text-align:center;margin-top:32px;font-size:0.65rem;color:#2d3d2d;letter-spacing:0.1em;font-family:monospace}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner{width:14px;height:14px;border:2px solid rgba(201,168,76,0.3);border-top-color:#c9a84c;border-radius:50%;display:inline-block;animation:spin 0.8s linear infinite;margin-right:8px;vertical-align:middle}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="wrap">
+  <div class="header">
+    <div class="badge"><div class="dot"></div><span class="badge-text">Sistema Activo</span></div>
+    <h1>Trader<span>-AI</span></h1>
+    <p class="sub">by Traders Factory</p>
+    <p class="desc">Analisis institucional SMC/ICT - VWAP - Volume - GEX - Order Flow</p>
+  </div>
+
+  <div class="card">
+    <div class="grid">
+      <div><label>ACTIVO</label><input id="asset" placeholder="ES, EURUSD, GC..." /></div>
+      <div><label>TEMPORALIDAD</label><input id="timeframe" placeholder="15m, 1H, 4H..." /></div>
+    </div>
+
+    <div class="dropzone" id="dropzone">
+      <p>Sube tu grafico aqui</p>
+      <small>Arrastra o haz click - PNG, JPG, WEBP</small>
+    </div>
+    <input type="file" id="fileInput" accept="image/*" style="display:none">
+
+    <div id="error" class="error" style="display:none"></div>
+    <button class="btn" id="btn" onclick="analyze()">Analizar con Trader-AI</button>
+  </div>
+
+  <div class="result" id="result" style="display:none">
+    <div class="result-header">
+      <div class="dot"></div>
+      <span class="result-title" id="result-title">Analisis</span>
+    </div>
+    <div class="analysis" id="analysis"></div>
+  </div>
+
+  <div class="footer">TRADERS FACTORY - MIYAGI TRADER - POWERED BY CLAUDE AI</div>
+</div>
+
+<script>
+const SYSTEM = `Eres Trader-AI, un asistente de trading institucional avanzado creado por Traders Factory y Miyagi Trader.
+
+Tu metodologia se basa en SMC, ICT, VWAP, Volume Profile, GEX, Order Flow y analisis multi-temporalidad.
+
+Analizas cualquier activo: futuros (ES, NQ, GC), forex (EURUSD, USDCAD, etc) e indices.
+
+Cuando recibes un grafico SIEMPRE respondes con estos 7 puntos en espanol:
+
+1. TENDENCIA (Timeframes Mayores)
+Esta subiendo, bajando o lateral en 4H y Daily?
+
+2. MAXIMOS Y MINIMOS IMPORTANTES
+Swing highs, swing lows, equal highs/lows relevantes.
+
+3. ZONAS DE LIQUIDEZ
+Buy-side, sell-side liquidity, stop hunts, equal highs/lows.
+
+4. PRECIO ACTUAL: CARO O BARATO?
+Premium, discount o equilibrio usando el 50% del rango.
+
+5. ZONAS INSTITUCIONALES
+Order Blocks, FVG, Breaker Blocks, VWAP, POC del Volume Profile.
+
+6. PLAN DE TRADING COMPLETO
+Direccion: COMPRA o VENTA
+Entrada: precio exacto
+Stop Loss: precio exacto
+Take Profit 1: primer objetivo
+Take Profit 2: segundo objetivo
+Risk/Reward ratio
+
+7. INVALIDACION
+Que tiene que pasar para que este analisis NO sea valido?
+
+Finaliza con: Advertencia: Este analisis es educativo y no constituye consejo financiero.`;
+
+let imageBase64 = null;
+let imageType = null;
+
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('fileInput');
+
+dropzone.addEventListener('click', () => fileInput.click());
+dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.style.borderColor = '#c9a84c'; });
+dropzone.addEventListener('dragleave', () => { dropzone.style.borderColor = 'rgba(201,168,76,0.2)'; });
+dropzone.addEventListener('drop', e => { e.preventDefault(); dropzone.style.borderColor = 'rgba(201,168,76,0.2)'; handleFile(e.dataTransfer.files[0]); });
+fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
+
+function handleFile(file) {
+  if (!file || !file.type.startsWith('image/')) return;
+  imageType = file.type;
+  const reader = new FileReader();
+  reader.onload = () => {
+    imageBase64 = reader.result.split(',')[1];
+    dropzone.classList.add('has-image');
+    dropzone.innerHTML = '<img src="' + reader.result + '" alt="grafico"><p class="change">Click para cambiar el grafico</p>';
+  };
+  reader.readAsDataURL(file);
+}
+
+function showError(msg) {
+  const el = document.getElementById('error');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+function hideError() {
+  document.getElementById('error').style.display = 'none';
+}
+
+async function analyze() {
+  hideError();
+  const asset = document.getElementById('asset').value.trim();
+  const timeframe = document.getElementById('timeframe').value.trim();
+  if (!imageBase64) return showError('Por favor sube un grafico primero.');
+  if (!asset) return showError('Indica el activo (ej: ES, EURUSD, GC).');
+  if (!timeframe) return showError('Indica la temporalidad (ej: 15m, 1H, 4H).');
+
+  const btn = document.getElementById('btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Analizando mercado...';
+  document.getElementById('result').style.display = 'none';
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+        'x-api-key': window.ANTHROPIC_KEY || ''
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 2000,
+        system: SYSTEM,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'image', source: { type: 'base64', media_type: imageType, data: imageBase64 } },
+            { type: 'text', text: 'Analiza este grafico de ' + asset.toUpperCase() + ' en temporalidad de ' + timeframe.toUpperCase() + '. Dame el analisis completo con los 7 puntos.' }
+          ]
+        }]
+      })
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error('Error ' + res.status + ': ' + (data?.error?.message || JSON.stringify(data)));
+    const text = data.content?.find(b => b.type === 'text')?.text || '';
+    if (!text) throw new Error('Respuesta vacia');
+
+    document.getElementById('result-title').textContent = 'Analisis - ' + asset.toUpperCase() + ' ' + timeframe.toUpperCase();
+    const analysisEl = document.getElementById('analysis');
+    analysisEl.innerHTML = text.split('\n').map(line => {
+      if (!line.trim()) return '<br>';
+      const isHeader = /^[1-7][\.\s]/.test(line.trim());
+      return '<p class="' + (isHeader ? 'header' : '') + '">' + line + '</p>';
+    }).join('');
+    document.getElementById('result').style.display = 'block';
+  } catch(err) {
+    showError(err.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Analizar con Trader-AI';
+  }
+}
+</script>
+</body>
+</html>
