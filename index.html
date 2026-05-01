@@ -37,6 +37,7 @@ input::placeholder{color:#3a4a3a}
 .result-title{font-size:0.7rem;letter-spacing:0.18em;color:#c9a84c;font-family:monospace;text-transform:uppercase}
 .analysis p{line-height:1.7;margin:2px 0;font-size:0.875rem;color:#d4d4d4}
 .analysis p.header{font-weight:700;color:#c9a84c;font-size:0.95rem;margin-top:14px}
+.analysis hr{border:none;border-top:1px solid rgba(201,168,76,0.15);margin:14px 0}
 .footer{text-align:center;margin-top:32px;font-size:0.65rem;color:#2d3d2d;letter-spacing:0.1em;font-family:monospace}
 @keyframes spin{to{transform:rotate(360deg)}}
 .spinner{width:14px;height:14px;border:2px solid rgba(201,168,76,0.3);border-top-color:#c9a84c;border-radius:50%;display:inline-block;animation:spin 0.8s linear infinite;margin-right:8px;vertical-align:middle}
@@ -128,11 +129,16 @@ async function analyze() {
   document.getElementById('result').style.display = 'none';
 
   try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 90000);
+
     const res = await fetch('/api/analyze', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ asset, timeframe, imageBase64, imageType })
+      body: JSON.stringify({ asset, timeframe, imageBase64, imageType }),
+      signal: controller.signal
     });
+    clearTimeout(timeout);
 
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || ('Error ' + res.status));
@@ -140,16 +146,32 @@ async function analyze() {
     const text = data.analysis || '';
     if (!text) throw new Error('Respuesta vacia del servidor');
 
-    document.getElementById('result-title').textContent = 'Analisis - ' + asset.toUpperCase() + ' ' + timeframe.toUpperCase();
-    const analysisEl = document.getElementById('analysis');
-    analysisEl.innerHTML = text.split('\n').map(line => {
-      if (!line.trim()) return '<br>';
-      const isHeader = /^[1-7][\.\s]/.test(line.trim());
-      return '<p class="' + (isHeader ? 'header' : '') + '">' + line + '</p>';
-    }).join('');
+    document.getElementById('result-title').textContent =
+      'Analisis - ' + asset.toUpperCase() + ' ' + timeframe.toUpperCase();
+
+    const html = text
+      .split('\n')
+      .map(line => {
+        const t = line.trim();
+        if (!t) return '<br>';
+        if (t === '---') return '<hr>';
+        let formatted = line
+          .replace(/\*\*(.+?)\*\*/g, '<strong style="color:#c9a84c">$1</strong>')
+          .replace(/^#{1,3}\s/, '');
+        const isHeader = /^#{1,3}\s/.test(t) || /^[1-7][\.\s]/.test(t);
+        return '<p class="' + (isHeader ? 'header' : '') + '">' + formatted + '</p>';
+      })
+      .join('');
+
+    document.getElementById('analysis').innerHTML = html;
     document.getElementById('result').style.display = 'block';
-  } catch(err) {
-    showError(err.message);
+    document.getElementById('result').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } catch (err) {
+    if (err.name === 'AbortError') {
+      showError('El analisis tardo mas de 90 segundos. Intenta de nuevo.');
+    } else {
+      showError(err.message || 'Error desconocido');
+    }
   } finally {
     btn.disabled = false;
     btn.textContent = 'Analizar con Trader-AI';
