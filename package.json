@@ -1,7 +1,8 @@
 {
   "name": "trader-ai",
   "version": "1.0.0",
+  "type": "module",
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.30.1"
+    "@anthropic-ai/sdk": "^0.32.1"
   }
 }
