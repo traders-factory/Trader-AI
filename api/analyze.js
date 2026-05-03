@@ -47,13 +47,30 @@ export const config = {
   maxDuration: 60,
 };
 
+// Validar codigo de acceso
+function isValidCode(code) {
+  if (!code) return false;
+  const validCodes = (process.env.ACCESS_CODES || "")
+    .split(",")
+    .map((c) => c.trim().toUpperCase())
+    .filter(Boolean);
+  return validCodes.includes(code.trim().toUpperCase());
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
   try {
-    const { asset, timeframe, imageBase64, imageType } = req.body;
+    const { asset, timeframe, imageBase64, imageType, accessCode } = req.body;
+
+    // Validacion de codigo
+    if (!isValidCode(accessCode)) {
+      return res.status(401).json({
+        error: "Codigo de acceso invalido. Contacta a Miyagi Trader.",
+      });
+    }
 
     if (!asset || !timeframe || !imageBase64) {
       return res.status(400).json({ error: "Faltan datos: activo, temporalidad o imagen" });
@@ -85,6 +102,9 @@ export default async function handler(req, res) {
     });
 
     const text = message.content.find((b) => b.type === "text")?.text || "";
+
+    // Log del codigo usado (para que veas en Vercel quien analiza)
+    console.log(`[Trader-AI] Code: ${accessCode} | Asset: ${asset} ${timeframe}`);
 
     return res.status(200).json({ analysis: text });
   } catch (err) {
