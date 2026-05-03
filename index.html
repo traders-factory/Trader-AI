@@ -31,6 +31,8 @@ input::placeholder{color:#3a4a3a}
 .dropzone .change{margin-top:8px;font-size:0.72rem;color:#6b7c6b;font-family:monospace}
 .btn{width:100%;padding:14px 24px;background:linear-gradient(135deg,#c9a84c,#a07830);border:1px solid #c9a84c;border-radius:8px;color:#0a0f0a;font-size:0.85rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer;font-family:monospace}
 .btn:disabled{background:rgba(201,168,76,0.1);border-color:rgba(201,168,76,0.2);color:#6b7c4a;cursor:not-allowed}
+.btn-ghost{background:transparent;border:1px solid rgba(201,168,76,0.3);color:#c9a84c;font-size:0.7rem;padding:8px 14px;cursor:pointer;border-radius:6px;font-family:monospace;letter-spacing:0.1em}
+.btn-ghost:hover{background:rgba(201,168,76,0.05)}
 .error{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:6px;padding:12px 14px;margin-bottom:14px;color:#f87171;font-size:0.78rem;font-family:monospace;word-break:break-word}
 .result{background:rgba(10,18,10,0.9);border:1px solid rgba(201,168,76,0.2);border-radius:12px;padding:28px}
 .result-header{display:flex;align-items:center;gap:10px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid rgba(201,168,76,0.1)}
@@ -39,18 +41,47 @@ input::placeholder{color:#3a4a3a}
 .analysis p.header{font-weight:700;color:#c9a84c;font-size:0.95rem;margin-top:14px}
 .analysis hr{border:none;border-top:1px solid rgba(201,168,76,0.15);margin:14px 0}
 .footer{text-align:center;margin-top:32px;font-size:0.65rem;color:#2d3d2d;letter-spacing:0.1em;font-family:monospace}
+.code-bar{display:flex;justify-content:space-between;align-items:center;background:rgba(201,168,76,0.05);border:1px solid rgba(201,168,76,0.15);border-radius:6px;padding:8px 14px;margin-bottom:16px;font-family:monospace;font-size:0.72rem}
+.code-bar span{color:#6b7c6b;letter-spacing:0.1em}
+.code-bar strong{color:#c9a84c;letter-spacing:0.15em}
+
+/* Modal de codigo */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(4px)}
+.modal{background:#0a120a;border:1px solid rgba(201,168,76,0.3);border-radius:12px;padding:36px;max-width:420px;width:90%;text-align:center}
+.modal h2{font-size:1.4rem;color:#f0e6c8;margin-bottom:8px}
+.modal h2 span{color:#c9a84c}
+.modal p{color:#6b7c6b;font-size:0.8rem;margin-bottom:20px;font-style:italic}
+.modal input{margin-bottom:14px;text-align:center;text-transform:uppercase;letter-spacing:0.15em}
+
 @keyframes spin{to{transform:rotate(360deg)}}
 .spinner{width:14px;height:14px;border:2px solid rgba(201,168,76,0.3);border-top-color:#c9a84c;border-radius:50%;display:inline-block;animation:spin 0.8s linear infinite;margin-right:8px;vertical-align:middle}
 </style>
 </head>
 <body>
 <div class="bg"></div>
-<div class="wrap">
+
+<!-- Modal de codigo de acceso -->
+<div class="modal-overlay" id="codeModal">
+  <div class="modal">
+    <h2>Trader<span>-AI</span></h2>
+    <p>Acceso exclusivo - Traders Factory</p>
+    <input id="codeInput" placeholder="MIYAGI-XXX" maxlength="20" />
+    <div id="codeError" class="error" style="display:none"></div>
+    <button class="btn" onclick="submitCode()">INGRESAR</button>
+  </div>
+</div>
+
+<div class="wrap" id="app" style="display:none">
   <div class="header">
     <div class="badge"><div class="dot"></div><span class="badge-text">Sistema Activo</span></div>
     <h1>Trader<span>-AI</span></h1>
     <p class="sub">by Traders Factory</p>
     <p class="desc">Analisis institucional SMC/ICT - VWAP - Volume - GEX - Order Flow</p>
+  </div>
+
+  <div class="code-bar">
+    <span>ACCESO: <strong id="userCode">---</strong></span>
+    <button class="btn-ghost" onclick="logout()">CERRAR SESION</button>
   </div>
 
   <div class="card">
@@ -83,7 +114,68 @@ input::placeholder{color:#3a4a3a}
 <script>
 let imageBase64 = null;
 let imageType = null;
+let accessCode = null;
 
+// ====== CONTROL DE ACCESO ======
+function checkAccess() {
+  const saved = localStorage.getItem('traderai_code');
+  if (saved) {
+    accessCode = saved;
+    document.getElementById('userCode').textContent = saved;
+    document.getElementById('codeModal').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+  }
+}
+
+async function submitCode() {
+  const input = document.getElementById('codeInput').value.trim().toUpperCase();
+  const errorEl = document.getElementById('codeError');
+  errorEl.style.display = 'none';
+
+  if (!input) {
+    errorEl.textContent = 'Ingresa tu codigo de acceso';
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  // Validar haciendo una peticion vacia (solo verifica el code)
+  try {
+    const res = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ accessCode: input })
+    });
+    const data = await res.json();
+
+    if (res.status === 401) {
+      errorEl.textContent = 'Codigo invalido. Contacta a Miyagi Trader.';
+      errorEl.style.display = 'block';
+      return;
+    }
+
+    // Si llego aqui, el codigo es valido (el error 400 por falta de datos confirma que paso la validacion)
+    accessCode = input;
+    localStorage.setItem('traderai_code', input);
+    document.getElementById('userCode').textContent = input;
+    document.getElementById('codeModal').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+  } catch (err) {
+    errorEl.textContent = 'Error de conexion. Intenta de nuevo.';
+    errorEl.style.display = 'block';
+  }
+}
+
+function logout() {
+  if (!confirm('Cerrar sesion y eliminar codigo guardado?')) return;
+  localStorage.removeItem('traderai_code');
+  location.reload();
+}
+
+document.getElementById('codeInput').addEventListener('keypress', e => {
+  if (e.key === 'Enter') submitCode();
+});
+
+// ====== UPLOAD DE IMAGEN ======
 const dropzone = document.getElementById('dropzone');
 const fileInput = document.getElementById('fileInput');
 
@@ -135,12 +227,21 @@ async function analyze() {
     const res = await fetch('/api/analyze', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ asset, timeframe, imageBase64, imageType }),
+      body: JSON.stringify({ asset, timeframe, imageBase64, imageType, accessCode }),
       signal: controller.signal
     });
     clearTimeout(timeout);
 
     const data = await res.json();
+
+    // Si el codigo se revoco, forzar logout
+    if (res.status === 401) {
+      localStorage.removeItem('traderai_code');
+      alert('Tu codigo ya no es valido. Contacta a Miyagi Trader.');
+      location.reload();
+      return;
+    }
+
     if (!res.ok) throw new Error(data.error || ('Error ' + res.status));
 
     const text = data.analysis || '';
@@ -177,6 +278,9 @@ async function analyze() {
     btn.textContent = 'Analizar con Trader-AI';
   }
 }
+
+// Inicializar
+checkAccess();
 </script>
 </body>
 </html>
