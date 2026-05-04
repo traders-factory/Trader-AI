@@ -33,10 +33,14 @@ input::placeholder{color:#3a4a3a}
 .btn:disabled{background:rgba(201,168,76,0.1);border-color:rgba(201,168,76,0.2);color:#6b7c4a;cursor:not-allowed}
 .btn-ghost{background:transparent;border:1px solid rgba(201,168,76,0.3);color:#c9a84c;font-size:0.7rem;padding:8px 14px;cursor:pointer;border-radius:6px;font-family:monospace;letter-spacing:0.1em}
 .btn-ghost:hover{background:rgba(201,168,76,0.05)}
+.btn-mini{background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.2);color:#c9a84c;font-size:0.7rem;padding:6px 12px;cursor:pointer;border-radius:5px;font-family:monospace;letter-spacing:0.08em;margin-left:6px}
+.btn-mini:hover{background:rgba(201,168,76,0.15)}
 .error{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:6px;padding:12px 14px;margin-bottom:14px;color:#f87171;font-size:0.78rem;font-family:monospace;word-break:break-word}
-.result{background:rgba(10,18,10,0.9);border:1px solid rgba(201,168,76,0.2);border-radius:12px;padding:28px}
-.result-header{display:flex;align-items:center;gap:10px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid rgba(201,168,76,0.1)}
+.result{background:rgba(10,18,10,0.9);border:1px solid rgba(201,168,76,0.2);border-radius:12px;padding:28px;margin-bottom:20px}
+.result-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid rgba(201,168,76,0.1)}
+.result-title-wrap{display:flex;align-items:center;gap:10px}
 .result-title{font-size:0.7rem;letter-spacing:0.18em;color:#c9a84c;font-family:monospace;text-transform:uppercase}
+.result-actions{display:flex;align-items:center}
 .analysis p{line-height:1.7;margin:2px 0;font-size:0.875rem;color:#d4d4d4}
 .analysis p.header{font-weight:700;color:#c9a84c;font-size:0.95rem;margin-top:14px}
 .analysis hr{border:none;border-top:1px solid rgba(201,168,76,0.15);margin:14px 0}
@@ -44,6 +48,20 @@ input::placeholder{color:#3a4a3a}
 .code-bar{display:flex;justify-content:space-between;align-items:center;background:rgba(201,168,76,0.05);border:1px solid rgba(201,168,76,0.15);border-radius:6px;padding:8px 14px;margin-bottom:16px;font-family:monospace;font-size:0.72rem}
 .code-bar span{color:#6b7c6b;letter-spacing:0.1em}
 .code-bar strong{color:#c9a84c;letter-spacing:0.15em}
+.code-bar-actions{display:flex;gap:6px;align-items:center}
+
+/* Historial */
+.history-section{margin-bottom:20px}
+.history-title{font-size:0.7rem;letter-spacing:0.18em;color:#c9a84c;font-family:monospace;text-transform:uppercase;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.history-list{display:grid;gap:8px}
+.history-item{background:rgba(10,18,10,0.6);border:1px solid rgba(201,168,76,0.1);border-radius:8px;padding:12px 16px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:all 0.2s;font-family:monospace}
+.history-item:hover{border-color:rgba(201,168,76,0.3);background:rgba(201,168,76,0.04)}
+.history-info{flex:1}
+.history-asset{color:#f0e6c8;font-size:0.85rem;font-weight:700;letter-spacing:0.05em}
+.history-date{color:#5a6b5a;font-size:0.7rem;margin-top:2px}
+.history-delete{color:#6b4a4a;font-size:0.75rem;padding:4px 10px;border:1px solid rgba(239,68,68,0.2);border-radius:4px;background:transparent;cursor:pointer;font-family:monospace}
+.history-delete:hover{background:rgba(239,68,68,0.1);color:#f87171}
+.history-empty{color:#3a4a3a;font-size:0.78rem;font-style:italic;text-align:center;padding:20px;font-family:Georgia,serif}
 
 /* Modal de codigo */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(4px)}
@@ -52,6 +70,10 @@ input::placeholder{color:#3a4a3a}
 .modal h2 span{color:#c9a84c}
 .modal p{color:#6b7c6b;font-size:0.8rem;margin-bottom:20px;font-style:italic}
 .modal input{margin-bottom:14px;text-align:center;text-transform:uppercase;letter-spacing:0.15em}
+
+/* Toast */
+.toast{position:fixed;bottom:20px;right:20px;background:#0a120a;border:1px solid rgba(201,168,76,0.3);border-radius:8px;padding:12px 20px;color:#c9a84c;font-family:monospace;font-size:0.8rem;letter-spacing:0.1em;z-index:2000;animation:slideIn 0.3s ease}
+@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
 
 @keyframes spin{to{transform:rotate(360deg)}}
 .spinner{width:14px;height:14px;border:2px solid rgba(201,168,76,0.3);border-top-color:#c9a84c;border-radius:50%;display:inline-block;animation:spin 0.8s linear infinite;margin-right:8px;vertical-align:middle}
@@ -81,7 +103,9 @@ input::placeholder{color:#3a4a3a}
 
   <div class="code-bar">
     <span>ACCESO: <strong id="userCode">---</strong></span>
-    <button class="btn-ghost" onclick="logout()">CERRAR SESION</button>
+    <div class="code-bar-actions">
+      <button class="btn-ghost" onclick="logout()">CERRAR SESION</button>
+    </div>
   </div>
 
   <div class="card">
@@ -100,10 +124,26 @@ input::placeholder{color:#3a4a3a}
     <button class="btn" id="btn" onclick="analyze()">Analizar con Trader-AI</button>
   </div>
 
+  <!-- Historial -->
+  <div class="history-section" id="historySection" style="display:none">
+    <div class="history-title">
+      <span>📚 Mis Analisis Recientes</span>
+      <button class="btn-ghost" onclick="clearAllHistory()">LIMPIAR HISTORIAL</button>
+    </div>
+    <div class="history-list" id="historyList"></div>
+  </div>
+
+  <!-- Resultado -->
   <div class="result" id="result" style="display:none">
     <div class="result-header">
-      <div class="dot"></div>
-      <span class="result-title" id="result-title">Analisis</span>
+      <div class="result-title-wrap">
+        <div class="dot"></div>
+        <span class="result-title" id="result-title">Analisis</span>
+      </div>
+      <div class="result-actions">
+        <button class="btn-mini" onclick="copyAnalysis()">📋 COPIAR</button>
+        <button class="btn-mini" onclick="newAnalysis()">+ NUEVO</button>
+      </div>
     </div>
     <div class="analysis" id="analysis"></div>
   </div>
@@ -111,10 +151,22 @@ input::placeholder{color:#3a4a3a}
   <div class="footer">TRADERS FACTORY - MIYAGI TRADER - POWERED BY CLAUDE AI</div>
 </div>
 
+<div id="toast" class="toast" style="display:none"></div>
+
 <script>
 let imageBase64 = null;
 let imageType = null;
 let accessCode = null;
+
+const MAX_HISTORY = 20;
+
+// ====== TOAST ======
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.style.display = 'block';
+  setTimeout(() => { toast.style.display = 'none'; }, 2500);
+}
 
 // ====== CONTROL DE ACCESO ======
 function checkAccess() {
@@ -124,6 +176,7 @@ function checkAccess() {
     document.getElementById('userCode').textContent = saved;
     document.getElementById('codeModal').style.display = 'none';
     document.getElementById('app').style.display = 'block';
+    renderHistory();
   }
 }
 
@@ -138,14 +191,12 @@ async function submitCode() {
     return;
   }
 
-  // Validar haciendo una peticion vacia (solo verifica el code)
   try {
     const res = await fetch('/api/analyze', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ accessCode: input })
     });
-    const data = await res.json();
 
     if (res.status === 401) {
       errorEl.textContent = 'Codigo invalido. Contacta a Miyagi Trader.';
@@ -153,12 +204,12 @@ async function submitCode() {
       return;
     }
 
-    // Si llego aqui, el codigo es valido (el error 400 por falta de datos confirma que paso la validacion)
     accessCode = input;
     localStorage.setItem('traderai_code', input);
     document.getElementById('userCode').textContent = input;
     document.getElementById('codeModal').style.display = 'none';
     document.getElementById('app').style.display = 'block';
+    renderHistory();
   } catch (err) {
     errorEl.textContent = 'Error de conexion. Intenta de nuevo.';
     errorEl.style.display = 'block';
@@ -166,7 +217,7 @@ async function submitCode() {
 }
 
 function logout() {
-  if (!confirm('Cerrar sesion y eliminar codigo guardado?')) return;
+  if (!confirm('Cerrar sesion? Tu historial se mantendra guardado.')) return;
   localStorage.removeItem('traderai_code');
   location.reload();
 }
@@ -174,6 +225,91 @@ function logout() {
 document.getElementById('codeInput').addEventListener('keypress', e => {
   if (e.key === 'Enter') submitCode();
 });
+
+// ====== HISTORIAL ======
+function getHistoryKey() {
+  return 'traderai_history_' + (accessCode || 'default');
+}
+
+function getHistory() {
+  try {
+    return JSON.parse(localStorage.getItem(getHistoryKey()) || '[]');
+  } catch { return []; }
+}
+
+function saveToHistory(asset, timeframe, analysis) {
+  const history = getHistory();
+  const item = {
+    id: Date.now(),
+    asset: asset.toUpperCase(),
+    timeframe: timeframe.toUpperCase(),
+    analysis,
+    date: new Date().toISOString()
+  };
+  history.unshift(item);
+  // Limitar a MAX_HISTORY items
+  const trimmed = history.slice(0, MAX_HISTORY);
+  try {
+    localStorage.setItem(getHistoryKey(), JSON.stringify(trimmed));
+  } catch (e) {
+    // Si excede el storage, eliminar los mas viejos
+    localStorage.setItem(getHistoryKey(), JSON.stringify(trimmed.slice(0, 10)));
+  }
+}
+
+function formatDate(iso) {
+  const d = new Date(iso);
+  const now = new Date();
+  const diff = (now - d) / 1000; // segundos
+  if (diff < 60) return 'hace un momento';
+  if (diff < 3600) return 'hace ' + Math.floor(diff / 60) + ' min';
+  if (diff < 86400) return 'hace ' + Math.floor(diff / 3600) + ' h';
+  return d.toLocaleDateString('es', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+}
+
+function renderHistory() {
+  const history = getHistory();
+  const section = document.getElementById('historySection');
+  const list = document.getElementById('historyList');
+
+  if (history.length === 0) {
+    section.style.display = 'none';
+    return;
+  }
+
+  section.style.display = 'block';
+  list.innerHTML = history.map(item => `
+    <div class="history-item" onclick="loadHistoryItem(${item.id})">
+      <div class="history-info">
+        <div class="history-asset">${item.asset} · ${item.timeframe}</div>
+        <div class="history-date">${formatDate(item.date)}</div>
+      </div>
+      <button class="history-delete" onclick="event.stopPropagation();deleteHistoryItem(${item.id})">ELIMINAR</button>
+    </div>
+  `).join('');
+}
+
+function loadHistoryItem(id) {
+  const item = getHistory().find(h => h.id === id);
+  if (!item) return;
+  renderAnalysis(item.asset, item.timeframe, item.analysis);
+  document.getElementById('result').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function deleteHistoryItem(id) {
+  const history = getHistory().filter(h => h.id !== id);
+  localStorage.setItem(getHistoryKey(), JSON.stringify(history));
+  renderHistory();
+  showToast('Analisis eliminado');
+}
+
+function clearAllHistory() {
+  if (!confirm('Borrar TODO tu historial de analisis? Esta accion no se puede deshacer.')) return;
+  localStorage.removeItem(getHistoryKey());
+  renderHistory();
+  document.getElementById('result').style.display = 'none';
+  showToast('Historial limpiado');
+}
 
 // ====== UPLOAD DE IMAGEN ======
 const dropzone = document.getElementById('dropzone');
@@ -207,6 +343,53 @@ function hideError() {
   document.getElementById('error').style.display = 'none';
 }
 
+// ====== RENDER DE ANALISIS ======
+function renderAnalysis(asset, timeframe, text) {
+  document.getElementById('result-title').textContent =
+    'Analisis - ' + asset.toUpperCase() + ' ' + timeframe.toUpperCase();
+
+  const html = text
+    .split('\n')
+    .map(line => {
+      const t = line.trim();
+      if (!t) return '<br>';
+      if (t === '---') return '<hr>';
+      let formatted = line
+        .replace(/\*\*(.+?)\*\*/g, '<strong style="color:#c9a84c">$1</strong>')
+        .replace(/^#{1,3}\s/, '');
+      const isHeader = /^#{1,3}\s/.test(t) || /^[1-7][\.\s]/.test(t);
+      return '<p class="' + (isHeader ? 'header' : '') + '">' + formatted + '</p>';
+    })
+    .join('');
+
+  document.getElementById('analysis').innerHTML = html;
+  document.getElementById('result').style.display = 'block';
+  document.getElementById('result').dataset.rawText = text;
+}
+
+function copyAnalysis() {
+  const text = document.getElementById('result').dataset.rawText || '';
+  if (!text) return showToast('Nada que copiar');
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('Analisis copiado al portapapeles');
+  }).catch(() => {
+    showToast('No se pudo copiar');
+  });
+}
+
+function newAnalysis() {
+  document.getElementById('result').style.display = 'none';
+  document.getElementById('asset').value = '';
+  document.getElementById('timeframe').value = '';
+  imageBase64 = null;
+  imageType = null;
+  dropzone.classList.remove('has-image');
+  dropzone.innerHTML = '<p>Sube tu grafico aqui</p><small>Arrastra o haz click - PNG, JPG, WEBP</small>';
+  document.getElementById('asset').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.getElementById('asset').focus();
+}
+
+// ====== ANALYZE ======
 async function analyze() {
   hideError();
   const asset = document.getElementById('asset').value.trim();
@@ -234,7 +417,6 @@ async function analyze() {
 
     const data = await res.json();
 
-    // Si el codigo se revoco, forzar logout
     if (res.status === 401) {
       localStorage.removeItem('traderai_code');
       alert('Tu codigo ya no es valido. Contacta a Miyagi Trader.');
@@ -247,25 +429,9 @@ async function analyze() {
     const text = data.analysis || '';
     if (!text) throw new Error('Respuesta vacia del servidor');
 
-    document.getElementById('result-title').textContent =
-      'Analisis - ' + asset.toUpperCase() + ' ' + timeframe.toUpperCase();
-
-    const html = text
-      .split('\n')
-      .map(line => {
-        const t = line.trim();
-        if (!t) return '<br>';
-        if (t === '---') return '<hr>';
-        let formatted = line
-          .replace(/\*\*(.+?)\*\*/g, '<strong style="color:#c9a84c">$1</strong>')
-          .replace(/^#{1,3}\s/, '');
-        const isHeader = /^#{1,3}\s/.test(t) || /^[1-7][\.\s]/.test(t);
-        return '<p class="' + (isHeader ? 'header' : '') + '">' + formatted + '</p>';
-      })
-      .join('');
-
-    document.getElementById('analysis').innerHTML = html;
-    document.getElementById('result').style.display = 'block';
+    renderAnalysis(asset, timeframe, text);
+    saveToHistory(asset, timeframe, text);
+    renderHistory();
     document.getElementById('result').scrollIntoView({ behavior: 'smooth', block: 'start' });
   } catch (err) {
     if (err.name === 'AbortError') {
