@@ -45,12 +45,17 @@ input::placeholder{color:#3a4a3a}
 .analysis p.header{font-weight:700;color:#c9a84c;font-size:0.95rem;margin-top:14px}
 .analysis hr{border:none;border-top:1px solid rgba(201,168,76,0.15);margin:14px 0}
 .footer{text-align:center;margin-top:32px;font-size:0.65rem;color:#2d3d2d;letter-spacing:0.1em;font-family:monospace}
-.code-bar{display:flex;justify-content:space-between;align-items:center;background:rgba(201,168,76,0.05);border:1px solid rgba(201,168,76,0.15);border-radius:6px;padding:8px 14px;margin-bottom:16px;font-family:monospace;font-size:0.72rem}
+.code-bar{display:flex;justify-content:space-between;align-items:center;background:rgba(201,168,76,0.05);border:1px solid rgba(201,168,76,0.15);border-radius:6px;padding:8px 14px;margin-bottom:16px;font-family:monospace;font-size:0.72rem;flex-wrap:wrap;gap:8px}
 .code-bar span{color:#6b7c6b;letter-spacing:0.1em}
 .code-bar strong{color:#c9a84c;letter-spacing:0.15em}
-.code-bar-actions{display:flex;gap:6px;align-items:center}
+.code-bar-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 
-/* Historial */
+/* Selector de idioma */
+.lang-toggle{display:inline-flex;background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.2);border-radius:6px;overflow:hidden;font-family:monospace}
+.lang-toggle button{background:transparent;border:none;color:#6b7c6b;padding:6px 12px;cursor:pointer;font-family:monospace;font-size:0.7rem;letter-spacing:0.1em;transition:all 0.2s}
+.lang-toggle button.active{background:rgba(201,168,76,0.2);color:#c9a84c;font-weight:700}
+.lang-toggle button:hover:not(.active){color:#c9a84c}
+
 .history-section{margin-bottom:20px}
 .history-title{font-size:0.7rem;letter-spacing:0.18em;color:#c9a84c;font-family:monospace;text-transform:uppercase;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
 .history-list{display:grid;gap:8px}
@@ -61,20 +66,18 @@ input::placeholder{color:#3a4a3a}
 .history-date{color:#5a6b5a;font-size:0.7rem;margin-top:2px}
 .history-delete{color:#6b4a4a;font-size:0.75rem;padding:4px 10px;border:1px solid rgba(239,68,68,0.2);border-radius:4px;background:transparent;cursor:pointer;font-family:monospace}
 .history-delete:hover{background:rgba(239,68,68,0.1);color:#f87171}
-.history-empty{color:#3a4a3a;font-size:0.78rem;font-style:italic;text-align:center;padding:20px;font-family:Georgia,serif}
+.history-lang-badge{display:inline-block;font-size:0.6rem;padding:2px 6px;background:rgba(201,168,76,0.1);border-radius:3px;color:#c9a84c;margin-left:8px;letter-spacing:0.1em}
 
-/* Modal de codigo */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(4px)}
 .modal{background:#0a120a;border:1px solid rgba(201,168,76,0.3);border-radius:12px;padding:36px;max-width:420px;width:90%;text-align:center}
 .modal h2{font-size:1.4rem;color:#f0e6c8;margin-bottom:8px}
 .modal h2 span{color:#c9a84c}
 .modal p{color:#6b7c6b;font-size:0.8rem;margin-bottom:20px;font-style:italic}
 .modal input{margin-bottom:14px;text-align:center;text-transform:uppercase;letter-spacing:0.15em}
+.modal .lang-toggle{margin-bottom:20px}
 
-/* Toast */
 .toast{position:fixed;bottom:20px;right:20px;background:#0a120a;border:1px solid rgba(201,168,76,0.3);border-radius:8px;padding:12px 20px;color:#c9a84c;font-family:monospace;font-size:0.8rem;letter-spacing:0.1em;z-index:2000;animation:slideIn 0.3s ease}
 @keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
-
 @keyframes spin{to{transform:rotate(360deg)}}
 .spinner{width:14px;height:14px;border:2px solid rgba(201,168,76,0.3);border-top-color:#c9a84c;border-radius:50%;display:inline-block;animation:spin 0.8s linear infinite;margin-right:8px;vertical-align:middle}
 </style>
@@ -82,41 +85,48 @@ input::placeholder{color:#3a4a3a}
 <body>
 <div class="bg"></div>
 
-<!-- Modal de codigo de acceso -->
 <div class="modal-overlay" id="codeModal">
   <div class="modal">
     <h2>Trader<span>-AI</span></h2>
-    <p>Acceso exclusivo - Traders Factory</p>
+    <p id="modalSubtitle">Acceso exclusivo - Traders Factory</p>
+    <div class="lang-toggle">
+      <button id="langBtnEs" class="active" onclick="setLanguage('es')">🇪🇸 ES</button>
+      <button id="langBtnEn" onclick="setLanguage('en')">🇺🇸 EN</button>
+    </div>
     <input id="codeInput" placeholder="MIYAGI-XXX" maxlength="20" />
     <div id="codeError" class="error" style="display:none"></div>
-    <button class="btn" onclick="submitCode()">INGRESAR</button>
+    <button class="btn" id="modalSubmitBtn" onclick="submitCode()">INGRESAR</button>
   </div>
 </div>
 
 <div class="wrap" id="app" style="display:none">
   <div class="header">
-    <div class="badge"><div class="dot"></div><span class="badge-text">Sistema Activo</span></div>
+    <div class="badge"><div class="dot"></div><span class="badge-text" id="badgeText">Sistema Activo</span></div>
     <h1>Trader<span>-AI</span></h1>
     <p class="sub">by Traders Factory</p>
-    <p class="desc">Analisis institucional SMC/ICT - VWAP - Volume - GEX - Order Flow</p>
+    <p class="desc" id="descText">Analisis institucional SMC/ICT - VWAP - Volume - GEX - Order Flow</p>
   </div>
 
   <div class="code-bar">
-    <span>ACCESO: <strong id="userCode">---</strong></span>
+    <span id="accessLabel">ACCESO: <strong id="userCode">---</strong></span>
     <div class="code-bar-actions">
-      <button class="btn-ghost" onclick="logout()">CERRAR SESION</button>
+      <div class="lang-toggle">
+        <button id="langBtnEs2" onclick="setLanguage('es')">🇪🇸 ES</button>
+        <button id="langBtnEn2" onclick="setLanguage('en')">🇺🇸 EN</button>
+      </div>
+      <button class="btn-ghost" id="logoutBtn" onclick="logout()">CERRAR SESION</button>
     </div>
   </div>
 
   <div class="card">
     <div class="grid">
-      <div><label>ACTIVO</label><input id="asset" placeholder="ES, EURUSD, GC..." /></div>
-      <div><label>TEMPORALIDAD</label><input id="timeframe" placeholder="15m, 1H, 4H..." /></div>
+      <div><label id="lblAsset">ACTIVO</label><input id="asset" placeholder="ES, EURUSD, GC..." /></div>
+      <div><label id="lblTimeframe">TEMPORALIDAD</label><input id="timeframe" placeholder="15m, 1H, 4H..." /></div>
     </div>
 
     <div class="dropzone" id="dropzone">
-      <p>Sube tu grafico aqui</p>
-      <small>Arrastra o haz click - PNG, JPG, WEBP</small>
+      <p id="dzTitle">Sube tu grafico aqui</p>
+      <small id="dzSubtitle">Arrastra o haz click - PNG, JPG, WEBP</small>
     </div>
     <input type="file" id="fileInput" accept="image/*" style="display:none">
 
@@ -124,16 +134,14 @@ input::placeholder{color:#3a4a3a}
     <button class="btn" id="btn" onclick="analyze()">Analizar con Trader-AI</button>
   </div>
 
-  <!-- Historial -->
   <div class="history-section" id="historySection" style="display:none">
     <div class="history-title">
-      <span>📚 Mis Analisis Recientes</span>
-      <button class="btn-ghost" onclick="clearAllHistory()">LIMPIAR HISTORIAL</button>
+      <span id="historyTitle">📚 Mis Analisis Recientes</span>
+      <button class="btn-ghost" id="clearHistoryBtn" onclick="clearAllHistory()">LIMPIAR HISTORIAL</button>
     </div>
     <div class="history-list" id="historyList"></div>
   </div>
 
-  <!-- Resultado -->
   <div class="result" id="result" style="display:none">
     <div class="result-header">
       <div class="result-title-wrap">
@@ -141,8 +149,8 @@ input::placeholder{color:#3a4a3a}
         <span class="result-title" id="result-title">Analisis</span>
       </div>
       <div class="result-actions">
-        <button class="btn-mini" onclick="copyAnalysis()">📋 COPIAR</button>
-        <button class="btn-mini" onclick="newAnalysis()">+ NUEVO</button>
+        <button class="btn-mini" id="copyBtn" onclick="copyAnalysis()">📋 COPIAR</button>
+        <button class="btn-mini" id="newBtn" onclick="newAnalysis()">+ NUEVO</button>
       </div>
     </div>
     <div class="analysis" id="analysis"></div>
@@ -154,11 +162,171 @@ input::placeholder{color:#3a4a3a}
 <div id="toast" class="toast" style="display:none"></div>
 
 <script>
+// ====== TRADUCCIONES ======
+const T = {
+  es: {
+    modalSubtitle: 'Acceso exclusivo - Traders Factory',
+    modalSubmit: 'INGRESAR',
+    codePlaceholder: 'MIYAGI-XXX',
+    badgeText: 'Sistema Activo',
+    descText: 'Analisis institucional SMC/ICT - VWAP - Volume - GEX - Order Flow',
+    accessLabel: 'ACCESO',
+    logoutBtn: 'CERRAR SESION',
+    lblAsset: 'ACTIVO',
+    lblTimeframe: 'TEMPORALIDAD',
+    assetPlaceholder: 'ES, EURUSD, GC...',
+    timeframePlaceholder: '15m, 1H, 4H...',
+    dzTitle: 'Sube tu grafico aqui',
+    dzSubtitle: 'Arrastra o haz click - PNG, JPG, WEBP',
+    dzChange: 'Click para cambiar el grafico',
+    analyzeBtn: 'Analizar con Trader-AI',
+    analyzing: 'Analizando mercado...',
+    historyTitle: '📚 Mis Analisis Recientes',
+    clearHistory: 'LIMPIAR HISTORIAL',
+    resultTitle: 'Analisis',
+    copyBtn: '📋 COPIAR',
+    newBtn: '+ NUEVO',
+    deleteBtn: 'ELIMINAR',
+    errNoImage: 'Por favor sube un grafico primero.',
+    errNoAsset: 'Indica el activo (ej: ES, EURUSD, GC).',
+    errNoTimeframe: 'Indica la temporalidad (ej: 15m, 1H, 4H).',
+    errTimeout: 'El analisis tardo mas de 90 segundos. Intenta de nuevo.',
+    errUnknown: 'Error desconocido',
+    errEmpty: 'Respuesta vacia del servidor',
+    errNoCode: 'Ingresa tu codigo de acceso',
+    errBadCode: 'Codigo invalido. Contacta a Miyagi Trader.',
+    errConnection: 'Error de conexion. Intenta de nuevo.',
+    invalidSession: 'Tu codigo ya no es valido. Contacta a Miyagi Trader.',
+    logoutConfirm: 'Cerrar sesion? Tu historial se mantendra guardado.',
+    clearHistoryConfirm: 'Borrar TODO tu historial de analisis? Esta accion no se puede deshacer.',
+    toastCopied: 'Analisis copiado al portapapeles',
+    toastCopyFail: 'No se pudo copiar',
+    toastNothingCopy: 'Nada que copiar',
+    toastDeleted: 'Analisis eliminado',
+    toastCleared: 'Historial limpiado',
+    dateNow: 'hace un momento',
+    dateMin: 'hace X min',
+    dateHour: 'hace X h',
+    locale: 'es'
+  },
+  en: {
+    modalSubtitle: 'Exclusive access - Traders Factory',
+    modalSubmit: 'ENTER',
+    codePlaceholder: 'MIYAGI-XXX',
+    badgeText: 'System Online',
+    descText: 'Institutional analysis SMC/ICT - VWAP - Volume - GEX - Order Flow',
+    accessLabel: 'ACCESS',
+    logoutBtn: 'LOG OUT',
+    lblAsset: 'ASSET',
+    lblTimeframe: 'TIMEFRAME',
+    assetPlaceholder: 'ES, EURUSD, GC...',
+    timeframePlaceholder: '15m, 1H, 4H...',
+    dzTitle: 'Upload your chart here',
+    dzSubtitle: 'Drag or click - PNG, JPG, WEBP',
+    dzChange: 'Click to change chart',
+    analyzeBtn: 'Analyze with Trader-AI',
+    analyzing: 'Analyzing market...',
+    historyTitle: '📚 My Recent Analyses',
+    clearHistory: 'CLEAR HISTORY',
+    resultTitle: 'Analysis',
+    copyBtn: '📋 COPY',
+    newBtn: '+ NEW',
+    deleteBtn: 'DELETE',
+    errNoImage: 'Please upload a chart first.',
+    errNoAsset: 'Enter the asset (ex: ES, EURUSD, GC).',
+    errNoTimeframe: 'Enter the timeframe (ex: 15m, 1H, 4H).',
+    errTimeout: 'Analysis took more than 90 seconds. Please try again.',
+    errUnknown: 'Unknown error',
+    errEmpty: 'Empty response from server',
+    errNoCode: 'Enter your access code',
+    errBadCode: 'Invalid code. Contact Miyagi Trader.',
+    errConnection: 'Connection error. Try again.',
+    invalidSession: 'Your code is no longer valid. Contact Miyagi Trader.',
+    logoutConfirm: 'Log out? Your history will remain saved.',
+    clearHistoryConfirm: 'Delete ALL your analysis history? This cannot be undone.',
+    toastCopied: 'Analysis copied to clipboard',
+    toastCopyFail: 'Could not copy',
+    toastNothingCopy: 'Nothing to copy',
+    toastDeleted: 'Analysis deleted',
+    toastCleared: 'History cleared',
+    dateNow: 'just now',
+    dateMin: 'X min ago',
+    dateHour: 'X h ago',
+    locale: 'en'
+  }
+};
+
+let currentLang = localStorage.getItem('traderai_lang') || 'es';
 let imageBase64 = null;
 let imageType = null;
 let accessCode = null;
-
 const MAX_HISTORY = 20;
+
+function t(key) { return T[currentLang][key] || key; }
+
+function setLanguage(lang) {
+  currentLang = lang;
+  localStorage.setItem('traderai_lang', lang);
+  applyLanguage();
+}
+
+function applyLanguage() {
+  // Modal
+  document.getElementById('modalSubtitle').textContent = t('modalSubtitle');
+  document.getElementById('modalSubmitBtn').textContent = t('modalSubmit');
+  document.getElementById('codeInput').placeholder = t('codePlaceholder');
+
+  // Header
+  document.getElementById('badgeText').textContent = t('badgeText');
+  document.getElementById('descText').textContent = t('descText');
+
+  // Code bar
+  const strongEl = document.getElementById('userCode');
+  document.getElementById('accessLabel').innerHTML =
+    t('accessLabel') + ': <strong id="userCode">' + strongEl.textContent + '</strong>';
+  document.getElementById('logoutBtn').textContent = t('logoutBtn');
+
+  // Form
+  document.getElementById('lblAsset').textContent = t('lblAsset');
+  document.getElementById('lblTimeframe').textContent = t('lblTimeframe');
+  document.getElementById('asset').placeholder = t('assetPlaceholder');
+  document.getElementById('timeframe').placeholder = t('timeframePlaceholder');
+
+  // Dropzone (solo si no hay imagen cargada)
+  if (!document.getElementById('dropzone').classList.contains('has-image')) {
+    document.getElementById('dropzone').innerHTML =
+      '<p id="dzTitle">' + t('dzTitle') + '</p>' +
+      '<small id="dzSubtitle">' + t('dzSubtitle') + '</small>';
+  }
+
+  // Analyze button
+  const btn = document.getElementById('btn');
+  if (!btn.disabled) btn.textContent = t('analyzeBtn');
+
+  // History
+  document.getElementById('historyTitle').textContent = t('historyTitle');
+  document.getElementById('clearHistoryBtn').textContent = t('clearHistory');
+
+  // Result actions
+  document.getElementById('copyBtn').textContent = t('copyBtn');
+  document.getElementById('newBtn').textContent = t('newBtn');
+
+  // Toggle visual state
+  ['langBtnEs', 'langBtnEs2'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('active', currentLang === 'es');
+  });
+  ['langBtnEn', 'langBtnEn2'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('active', currentLang === 'en');
+  });
+
+  // HTML lang attribute
+  document.documentElement.lang = currentLang;
+
+  // Re-render history si esta visible
+  renderHistory();
+}
 
 // ====== TOAST ======
 function showToast(msg) {
@@ -168,7 +336,7 @@ function showToast(msg) {
   setTimeout(() => { toast.style.display = 'none'; }, 2500);
 }
 
-// ====== CONTROL DE ACCESO ======
+// ====== ACCESO ======
 function checkAccess() {
   const saved = localStorage.getItem('traderai_code');
   if (saved) {
@@ -176,7 +344,10 @@ function checkAccess() {
     document.getElementById('userCode').textContent = saved;
     document.getElementById('codeModal').style.display = 'none';
     document.getElementById('app').style.display = 'block';
+    applyLanguage();
     renderHistory();
+  } else {
+    applyLanguage();
   }
 }
 
@@ -186,7 +357,7 @@ async function submitCode() {
   errorEl.style.display = 'none';
 
   if (!input) {
-    errorEl.textContent = 'Ingresa tu codigo de acceso';
+    errorEl.textContent = t('errNoCode');
     errorEl.style.display = 'block';
     return;
   }
@@ -195,11 +366,11 @@ async function submitCode() {
     const res = await fetch('/api/analyze', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ accessCode: input })
+      body: JSON.stringify({ accessCode: input, language: currentLang })
     });
 
     if (res.status === 401) {
-      errorEl.textContent = 'Codigo invalido. Contacta a Miyagi Trader.';
+      errorEl.textContent = t('errBadCode');
       errorEl.style.display = 'block';
       return;
     }
@@ -209,15 +380,16 @@ async function submitCode() {
     document.getElementById('userCode').textContent = input;
     document.getElementById('codeModal').style.display = 'none';
     document.getElementById('app').style.display = 'block';
+    applyLanguage();
     renderHistory();
   } catch (err) {
-    errorEl.textContent = 'Error de conexion. Intenta de nuevo.';
+    errorEl.textContent = t('errConnection');
     errorEl.style.display = 'block';
   }
 }
 
 function logout() {
-  if (!confirm('Cerrar sesion? Tu historial se mantendra guardado.')) return;
+  if (!confirm(t('logoutConfirm'))) return;
   localStorage.removeItem('traderai_code');
   location.reload();
 }
@@ -227,64 +399,52 @@ document.getElementById('codeInput').addEventListener('keypress', e => {
 });
 
 // ====== HISTORIAL ======
-function getHistoryKey() {
-  return 'traderai_history_' + (accessCode || 'default');
-}
+function getHistoryKey() { return 'traderai_history_' + (accessCode || 'default'); }
 
 function getHistory() {
-  try {
-    return JSON.parse(localStorage.getItem(getHistoryKey()) || '[]');
-  } catch { return []; }
+  try { return JSON.parse(localStorage.getItem(getHistoryKey()) || '[]'); }
+  catch { return []; }
 }
 
-function saveToHistory(asset, timeframe, analysis) {
+function saveToHistory(asset, timeframe, analysis, lang) {
   const history = getHistory();
   const item = {
     id: Date.now(),
     asset: asset.toUpperCase(),
     timeframe: timeframe.toUpperCase(),
     analysis,
+    lang: lang || currentLang,
     date: new Date().toISOString()
   };
   history.unshift(item);
-  // Limitar a MAX_HISTORY items
   const trimmed = history.slice(0, MAX_HISTORY);
-  try {
-    localStorage.setItem(getHistoryKey(), JSON.stringify(trimmed));
-  } catch (e) {
-    // Si excede el storage, eliminar los mas viejos
-    localStorage.setItem(getHistoryKey(), JSON.stringify(trimmed.slice(0, 10)));
-  }
+  try { localStorage.setItem(getHistoryKey(), JSON.stringify(trimmed)); }
+  catch (e) { localStorage.setItem(getHistoryKey(), JSON.stringify(trimmed.slice(0, 10))); }
 }
 
 function formatDate(iso) {
   const d = new Date(iso);
   const now = new Date();
-  const diff = (now - d) / 1000; // segundos
-  if (diff < 60) return 'hace un momento';
-  if (diff < 3600) return 'hace ' + Math.floor(diff / 60) + ' min';
-  if (diff < 86400) return 'hace ' + Math.floor(diff / 3600) + ' h';
-  return d.toLocaleDateString('es', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+  const diff = (now - d) / 1000;
+  if (diff < 60) return t('dateNow');
+  if (diff < 3600) return t('dateMin').replace('X', Math.floor(diff / 60));
+  if (diff < 86400) return t('dateHour').replace('X', Math.floor(diff / 3600));
+  return d.toLocaleDateString(T[currentLang].locale, { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
 }
 
 function renderHistory() {
   const history = getHistory();
   const section = document.getElementById('historySection');
   const list = document.getElementById('historyList');
-
-  if (history.length === 0) {
-    section.style.display = 'none';
-    return;
-  }
-
+  if (history.length === 0) { section.style.display = 'none'; return; }
   section.style.display = 'block';
   list.innerHTML = history.map(item => `
     <div class="history-item" onclick="loadHistoryItem(${item.id})">
       <div class="history-info">
-        <div class="history-asset">${item.asset} · ${item.timeframe}</div>
+        <div class="history-asset">${item.asset} · ${item.timeframe}<span class="history-lang-badge">${(item.lang || 'es').toUpperCase()}</span></div>
         <div class="history-date">${formatDate(item.date)}</div>
       </div>
-      <button class="history-delete" onclick="event.stopPropagation();deleteHistoryItem(${item.id})">ELIMINAR</button>
+      <button class="history-delete" onclick="event.stopPropagation();deleteHistoryItem(${item.id})">${t('deleteBtn')}</button>
     </div>
   `).join('');
 }
@@ -300,18 +460,18 @@ function deleteHistoryItem(id) {
   const history = getHistory().filter(h => h.id !== id);
   localStorage.setItem(getHistoryKey(), JSON.stringify(history));
   renderHistory();
-  showToast('Analisis eliminado');
+  showToast(t('toastDeleted'));
 }
 
 function clearAllHistory() {
-  if (!confirm('Borrar TODO tu historial de analisis? Esta accion no se puede deshacer.')) return;
+  if (!confirm(t('clearHistoryConfirm'))) return;
   localStorage.removeItem(getHistoryKey());
   renderHistory();
   document.getElementById('result').style.display = 'none';
-  showToast('Historial limpiado');
+  showToast(t('toastCleared'));
 }
 
-// ====== UPLOAD DE IMAGEN ======
+// ====== UPLOAD ======
 const dropzone = document.getElementById('dropzone');
 const fileInput = document.getElementById('fileInput');
 
@@ -328,7 +488,7 @@ function handleFile(file) {
   reader.onload = () => {
     imageBase64 = reader.result.split(',')[1];
     dropzone.classList.add('has-image');
-    dropzone.innerHTML = '<img src="' + reader.result + '" alt="grafico"><p class="change">Click para cambiar el grafico</p>';
+    dropzone.innerHTML = '<img src="' + reader.result + '" alt="chart"><p class="change">' + t('dzChange') + '</p>';
   };
   reader.readAsDataURL(file);
 }
@@ -338,29 +498,22 @@ function showError(msg) {
   el.textContent = msg;
   el.style.display = 'block';
 }
+function hideError() { document.getElementById('error').style.display = 'none'; }
 
-function hideError() {
-  document.getElementById('error').style.display = 'none';
-}
-
-// ====== RENDER DE ANALISIS ======
 function renderAnalysis(asset, timeframe, text) {
   document.getElementById('result-title').textContent =
-    'Analisis - ' + asset.toUpperCase() + ' ' + timeframe.toUpperCase();
+    t('resultTitle') + ' - ' + asset.toUpperCase() + ' ' + timeframe.toUpperCase();
 
-  const html = text
-    .split('\n')
-    .map(line => {
-      const t = line.trim();
-      if (!t) return '<br>';
-      if (t === '---') return '<hr>';
-      let formatted = line
-        .replace(/\*\*(.+?)\*\*/g, '<strong style="color:#c9a84c">$1</strong>')
-        .replace(/^#{1,3}\s/, '');
-      const isHeader = /^#{1,3}\s/.test(t) || /^[1-7][\.\s]/.test(t);
-      return '<p class="' + (isHeader ? 'header' : '') + '">' + formatted + '</p>';
-    })
-    .join('');
+  const html = text.split('\n').map(line => {
+    const tr = line.trim();
+    if (!tr) return '<br>';
+    if (tr === '---') return '<hr>';
+    let formatted = line
+      .replace(/\*\*(.+?)\*\*/g, '<strong style="color:#c9a84c">$1</strong>')
+      .replace(/^#{1,3}\s/, '');
+    const isHeader = /^#{1,3}\s/.test(tr) || /^[1-7][\.\s]/.test(tr);
+    return '<p class="' + (isHeader ? 'header' : '') + '">' + formatted + '</p>';
+  }).join('');
 
   document.getElementById('analysis').innerHTML = html;
   document.getElementById('result').style.display = 'block';
@@ -369,12 +522,10 @@ function renderAnalysis(asset, timeframe, text) {
 
 function copyAnalysis() {
   const text = document.getElementById('result').dataset.rawText || '';
-  if (!text) return showToast('Nada que copiar');
-  navigator.clipboard.writeText(text).then(() => {
-    showToast('Analisis copiado al portapapeles');
-  }).catch(() => {
-    showToast('No se pudo copiar');
-  });
+  if (!text) return showToast(t('toastNothingCopy'));
+  navigator.clipboard.writeText(text)
+    .then(() => showToast(t('toastCopied')))
+    .catch(() => showToast(t('toastCopyFail')));
 }
 
 function newAnalysis() {
@@ -384,23 +535,22 @@ function newAnalysis() {
   imageBase64 = null;
   imageType = null;
   dropzone.classList.remove('has-image');
-  dropzone.innerHTML = '<p>Sube tu grafico aqui</p><small>Arrastra o haz click - PNG, JPG, WEBP</small>';
+  dropzone.innerHTML = '<p id="dzTitle">' + t('dzTitle') + '</p><small id="dzSubtitle">' + t('dzSubtitle') + '</small>';
   document.getElementById('asset').scrollIntoView({ behavior: 'smooth', block: 'start' });
   document.getElementById('asset').focus();
 }
 
-// ====== ANALYZE ======
 async function analyze() {
   hideError();
   const asset = document.getElementById('asset').value.trim();
   const timeframe = document.getElementById('timeframe').value.trim();
-  if (!imageBase64) return showError('Por favor sube un grafico primero.');
-  if (!asset) return showError('Indica el activo (ej: ES, EURUSD, GC).');
-  if (!timeframe) return showError('Indica la temporalidad (ej: 15m, 1H, 4H).');
+  if (!imageBase64) return showError(t('errNoImage'));
+  if (!asset) return showError(t('errNoAsset'));
+  if (!timeframe) return showError(t('errNoTimeframe'));
 
   const btn = document.getElementById('btn');
   btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>Analizando mercado...';
+  btn.innerHTML = '<span class="spinner"></span>' + t('analyzing');
   document.getElementById('result').style.display = 'none';
 
   try {
@@ -410,7 +560,7 @@ async function analyze() {
     const res = await fetch('/api/analyze', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ asset, timeframe, imageBase64, imageType, accessCode }),
+      body: JSON.stringify({ asset, timeframe, imageBase64, imageType, accessCode, language: currentLang }),
       signal: controller.signal
     });
     clearTimeout(timeout);
@@ -419,7 +569,7 @@ async function analyze() {
 
     if (res.status === 401) {
       localStorage.removeItem('traderai_code');
-      alert('Tu codigo ya no es valido. Contacta a Miyagi Trader.');
+      alert(t('invalidSession'));
       location.reload();
       return;
     }
@@ -427,25 +577,21 @@ async function analyze() {
     if (!res.ok) throw new Error(data.error || ('Error ' + res.status));
 
     const text = data.analysis || '';
-    if (!text) throw new Error('Respuesta vacia del servidor');
+    if (!text) throw new Error(t('errEmpty'));
 
     renderAnalysis(asset, timeframe, text);
-    saveToHistory(asset, timeframe, text);
+    saveToHistory(asset, timeframe, text, currentLang);
     renderHistory();
     document.getElementById('result').scrollIntoView({ behavior: 'smooth', block: 'start' });
   } catch (err) {
-    if (err.name === 'AbortError') {
-      showError('El analisis tardo mas de 90 segundos. Intenta de nuevo.');
-    } else {
-      showError(err.message || 'Error desconocido');
-    }
+    if (err.name === 'AbortError') showError(t('errTimeout'));
+    else showError(err.message || t('errUnknown'));
   } finally {
     btn.disabled = false;
-    btn.textContent = 'Analizar con Trader-AI';
+    btn.textContent = t('analyzeBtn');
   }
 }
 
-// Inicializar
 checkAccess();
 </script>
 </body>
