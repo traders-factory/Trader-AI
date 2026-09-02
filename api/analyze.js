@@ -122,8 +122,9 @@ export default async function handler(req, res) {
       : `Analiza este grafico de ${asset.toUpperCase()} en temporalidad de ${timeframe.toUpperCase()}. Dame el analisis completo con los 7 puntos.`;
 
     const message = await client.messages.create({
+      console.log('stop_reason:', message.stop_reason)
       model: "claude-fable-5-1",
-      max_tokens: 2500,
+      max_tokens: 4096,
       system,
       messages: [
         {
